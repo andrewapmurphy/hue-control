@@ -1,11 +1,22 @@
 package com.cyndre.huecenter.hue;
 
+import java.awt.*;
+
 public class LightState {
+    private static final float MAX_HUE = 65535F;
+    private static final float MAX_SAT = 254F;
+    private static final float MAX_BRI = 254F;
+
+    private static final int INDEX_HUE = 0;
+    private static final int INDEX_SAT = 1;
+    private static final int INDEX_BRI = 2;
+
     private boolean on;
-    private byte bri;
+    private int bri;
     private int hue;
-    private byte sat;
+    private int sat;
     private int ct;
+    private String colormode = "hs";
 
     //true if the light should be on.
     public boolean isOn() {
@@ -17,12 +28,12 @@ public class LightState {
     }
 
     //brightness, in range 0 - 254. 0 is not off.
-    public byte getBri() {
+    public int getBri() {
         return bri;
     }
 
     //hue, in range 0 - 65535.
-    public void setBri(byte bri) {
+    public void setBri(int bri) {
         this.bri = bri;
     }
 
@@ -35,11 +46,11 @@ public class LightState {
         this.hue = hue;
     }
 
-    public byte getSat() {
+    public int getSat() {
         return sat;
     }
 
-    public void setSat(byte sat) {
+    public void setSat(int sat) {
         this.sat = sat;
     }
 
@@ -50,5 +61,69 @@ public class LightState {
 
     public void setCt(int ct) {
         this.ct = ct;
+    }
+
+    public String getColormode() {
+        return colormode;
+    }
+
+    public void setColormode(String colormode) {
+        this.colormode = colormode;
+    }
+
+    public static Color toColor(final LightState lightState) {
+        if (lightState == null || lightState.on == false) {
+            return Color.BLACK;
+        }
+
+        float h = (float)lightState.hue / MAX_HUE;
+        float s = (float)lightState.sat / MAX_SAT;
+        float b = (float)lightState.bri / MAX_BRI;
+
+        Color color = Color.getHSBColor(h, s, b);
+
+        //Color color = HSVtoRGB(h, s, b);
+
+        //color = new Color(color.getBlue(), color.getGreen(), color.getRed());
+
+        //LightState newState = toLightState(color);
+
+        return color;
+    }
+
+    public static LightState toLightState(final Color color) {
+        final LightState lightState = new LightState();
+
+        if (color == null || color.equals(Color.BLACK)) {
+            lightState.on = false;
+        } else {
+            lightState.on = true;
+
+            //final float[] hsbValues = RGBtoHSV(color);
+            final float[] hsbValues = Color.RGBtoHSB(
+                    color.getRed(),
+                    color.getGreen(),
+                    color.getBlue(),
+                    null
+            );
+
+            lightState.hue = (int)(hsbValues[INDEX_HUE] * MAX_HUE);
+            lightState.sat = (int)(hsbValues[INDEX_SAT] * MAX_SAT);
+            lightState.bri = (int)(hsbValues[INDEX_BRI] * MAX_BRI);
+        }
+
+        return lightState;
+    }
+
+    @Override
+    public String toString() {
+        return "LightState{" +
+                "on=" + on +
+                ", bri=" + bri +
+                ", hue=" + hue +
+                ", sat=" + sat +
+                ", ct=" + ct +
+                ", colormode='" + colormode + '\'' +
+                '}';
     }
 }
