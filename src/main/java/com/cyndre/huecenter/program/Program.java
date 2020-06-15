@@ -14,9 +14,7 @@ import java.util.concurrent.TimeUnit;
 public class Program {
     public static final String PROPERTY_INPUT = "input";
     public static final String PROPERTY_OUTPUT = "output";
-    public static final String PROPERTY_CONTEXT = "context";
-    public static final String PROPERTY_TOCOLOR = "toColor";
-    public static final String PROPERTY_TOLIGHTSTATE = "toLightState";
+    public static final String PROPERTY_CONTEXT = "api";
 
     public static class Loader {
         private final GroovyShell shell = new GroovyShell();
@@ -41,6 +39,13 @@ public class Program {
         private boolean running = true;
         private ArrayList<String> logs = new ArrayList<>();
 
+        public Color toColor(final double r, double g, double b ) {
+            return toColor((float)r, (float)g, (float)b);
+        }
+        public Color toColor(final float r, float g, float b ) {
+            return new Color(r, g, b);
+        }
+
         public Color toColor(final LightState light) {
             return LightState.toColor(light);
         }
@@ -56,6 +61,12 @@ public class Program {
         public void debug(String format, Object... parts) {
             this.logs.add(String.format(format, (Object[]) parts));
         }
+
+        public double random() {
+            return Math.random();
+        }
+
+
 
         public ArrayList<String> getLogs() {
             return logs;

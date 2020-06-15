@@ -203,10 +203,13 @@ implements
         this.lightsContainer.removeAll();
 
         if (!results.isEmpty()) {
-            results.get().entrySet().stream().forEach((kv) -> {
-                Color color = LightState.toColor(kv.getValue());
-                this.lightsContainer.add(new LightView(color, kv.getKey()));
-            });
+            results.get().entrySet().stream()
+                .forEach((kv) -> {
+                    this.log("%s: %s", kv.getKey(), kv.getValue());
+
+                    Color color = LightState.toColor(kv.getValue());
+                    this.lightsContainer.add(new LightView(color, kv.getKey()));
+                });
         }
 
         this.lightsContainer.revalidate();

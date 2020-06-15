@@ -15,8 +15,6 @@ public class LightState {
     private int bri;
     private int hue;
     private int sat;
-    private int ct;
-    private String colormode = "hs";
 
     //true if the light should be on.
     public boolean isOn() {
@@ -52,23 +50,6 @@ public class LightState {
 
     public void setSat(int sat) {
         this.sat = sat;
-    }
-
-    //white color temperature, 154 (cold) - 500 (warm).
-    public int getCt() {
-        return ct;
-    }
-
-    public void setCt(int ct) {
-        this.ct = ct;
-    }
-
-    public String getColormode() {
-        return colormode;
-    }
-
-    public void setColormode(String colormode) {
-        this.colormode = colormode;
     }
 
     public static Color toColor(final LightState lightState) {
@@ -117,13 +98,11 @@ public class LightState {
 
     @Override
     public String toString() {
-        return "LightState{" +
-                "on=" + on +
-                ", bri=" + bri +
-                ", hue=" + hue +
-                ", sat=" + sat +
-                ", ct=" + ct +
-                ", colormode='" + colormode + '\'' +
-                '}';
+        return "{" +
+                " on: " + on +
+                ", bri: " + bri +
+                ", hue: " + hue +
+                ", sat: " + sat +
+                " }";
     }
 }

@@ -1,17 +1,14 @@
 package com.cyndre.huecenter;
 
-import com.cyndre.huecenter.hue.Error;
 import com.cyndre.huecenter.hue.GetLightResponse;
 import com.cyndre.huecenter.hue.LightGroup;
 import com.cyndre.huecenter.hue.LightState;
 import com.cyndre.huecenter.program.Program;
 import com.cyndre.huecenter.time.TimeData;
-import com.cyndre.huecenter.time.TimeDataView;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.net.http.HttpClient;
-import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -53,59 +50,56 @@ public class Application implements CommandInterface {
 
         this.Log("Executed %s %s", exeContext.scriptText, exeContext.lights.keySet().stream().collect(Collectors.joining(",")));
 
-        final Program program = this.programLoader.Load(exeContext.scriptText);
-        program.Setup(exeContext.lights, System.currentTimeMillis());
+        try {
+            final Program program = this.programLoader.Load(exeContext.scriptText);
+            program.Setup(exeContext.lights, System.currentTimeMillis());
 
-        this.executor.execute(() -> {
-            final Program.Context context = program.getContext();
-            final long frameDurationMs = context.getFrameDurationMs();
+            this.executor.execute(() -> {
+                final Program.Context context = program.getContext();
+                final long frameDurationMs = context.getFrameDurationMs();
 
-            while (context.isRunning()) {
-                final long frameStartTimeMs = System.currentTimeMillis();
-                Step(program, frameStartTimeMs);
+                while (context.isRunning()) {
+                    final long frameStartTimeMs = System.currentTimeMillis();
 
-                final long frameEndTime = System.currentTimeMillis();
-                final long thisFrameDuration = frameEndTime - frameStartTimeMs;
+                    program.Step(frameStartTimeMs);
 
-                //View
-                context.getLogs().forEach(this::Log);
-                this.view.onLights(Optional.of(program.getOutputBuffer()), Collections.EMPTY_LIST);
+                    final Map<String, LightState> stepUpdate = program.getOutputBuffer();
 
-                //Pause
-                quietSleep(frameDurationMs - thisFrameDuration);
-            }
-        });
+                    if (stepUpdate == null || stepUpdate.isEmpty()) {
+                        return;
+                    }
 
-        return program.getContext();
-    }
+                    stepUpdate.entrySet().stream().forEach((kv) -> {
+                        this.lights.put(kv.getKey(), kv.getValue());
 
-    private static void quietSleep(final long durationMilis) {
-        if (durationMilis > 0L) {
-            try {
-                Thread.sleep(durationMilis);
-            } catch (InterruptedException ie) { }
+                        //Start of view
+                        this.SetLight(kv.getKey(), kv.getValue());
+                    });
+
+                    final long frameEndTime = System.currentTimeMillis();
+                    final long thisFrameDuration = frameEndTime - frameStartTimeMs;
+
+                    //View
+                    context.getLogs().forEach(this::Log);
+                    this.view.onLights(Optional.of(program.getOutputBuffer()), Collections.EMPTY_LIST);
+
+                    //Pause
+                    final long sleepDurationMs = frameDurationMs - thisFrameDuration;
+
+                    if (sleepDurationMs > 0L) {
+                        try {
+                            Thread.sleep(sleepDurationMs);
+                        } catch (InterruptedException ie) { }
+                    }
+                }
+            });
+
+            return program.getContext();
+        } catch (Exception e) {
+            this.Log("Error setting up program to execute: %s", e);
+
+            return null;
         }
-    }
-
-    private void Step(final Program program, final long timeMs) {
-        program.Step(timeMs);
-
-        final Map<String, LightState> stepUpdate = program.getOutputBuffer();
-
-        if (stepUpdate == null || stepUpdate.isEmpty()) {
-            return;
-        }
-
-        this.Log("Stepped %s", stepUpdate.size());
-
-        stepUpdate.entrySet().stream().forEach((kv) -> {
-            this.Log("LightId %s on=%b", kv.getKey(), kv.getValue().isOn());
-
-            this.lights.put(kv.getKey(), kv.getValue());
-
-            //TODO Move to view
-            this.SetLight(kv.getKey(), kv.getValue());
-        });
     }
 
     @Override
