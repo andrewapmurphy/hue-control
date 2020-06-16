@@ -6,6 +6,9 @@ import groovy.lang.GroovyShell;
 import groovy.lang.Script;
 
 import java.awt.*;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -14,7 +17,8 @@ import java.util.concurrent.TimeUnit;
 public class Program {
     public static final String PROPERTY_INPUT = "input";
     public static final String PROPERTY_OUTPUT = "output";
-    public static final String PROPERTY_CONTEXT = "api";
+    public static final String PROPERTY_CONTEXT = "context";
+    public static final String PROPERTY_API = "api";
 
     public static class Loader {
         private final GroovyShell shell = new GroovyShell();
@@ -22,6 +26,14 @@ public class Program {
         public Program Load(final String script) {
             return new Program(this.shell.parse(script), new HashMap<>(), new HashMap<>());
         }
+
+        /*public Program LoadFile(final Path path) {
+            try {
+                Files.readString(path);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }*/
     }
 
     public static class Context {
@@ -39,34 +51,9 @@ public class Program {
         private boolean running = true;
         private ArrayList<String> logs = new ArrayList<>();
 
-        public Color toColor(final double r, double g, double b ) {
-            return toColor((float)r, (float)g, (float)b);
-        }
-        public Color toColor(final float r, float g, float b ) {
-            return new Color(r, g, b);
-        }
-
-        public Color toColor(final LightState light) {
-            return LightState.toColor(light);
-        }
-
-        public LightState toLightState(final Color color) {
-            return LightState.toLightState(color);
-        }
-
-        public LightState toLightState(final int r, int g, int b) {
-            return toLightState(new Color(r, g, b));
-        }
-
         public void debug(String format, Object... parts) {
             this.logs.add(String.format(format, (Object[]) parts));
         }
-
-        public double random() {
-            return Math.random();
-        }
-
-
 
         public ArrayList<String> getLogs() {
             return logs;
@@ -135,6 +122,7 @@ public class Program {
         this.shellBinding.setProperty(PROPERTY_INPUT, inputBuffer);
 
         this.shellBinding.setProperty(PROPERTY_CONTEXT, this.context);
+        this.shellBinding.setProperty(PROPERTY_API, new Api());
         this.context.StartTime(systemTimeMs);
     }
 
