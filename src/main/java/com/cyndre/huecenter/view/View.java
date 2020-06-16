@@ -1,5 +1,6 @@
-package com.cyndre.huecenter;
+package com.cyndre.huecenter.view;
 
+import com.cyndre.huecenter.CommandInterface;
 import com.cyndre.huecenter.hue.Error;
 import com.cyndre.huecenter.hue.LightGroup;
 import com.cyndre.huecenter.hue.LightState;
@@ -100,6 +101,7 @@ implements
 
     private void buildBaseInterface(final Container container, GridBagConstraints c) {
         this.lightsContainer = new JPanel();
+        this.lightsContainer.add(LightView.empty());
         this.logText = new JTextArea();
         this.inputField = new RSyntaxTextArea();
         this.lightGroupComboBox = new JComboBox();

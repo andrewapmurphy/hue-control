@@ -5,6 +5,7 @@ import com.cyndre.huecenter.hue.LightGroup;
 import com.cyndre.huecenter.hue.LightState;
 import com.cyndre.huecenter.program.Program;
 import com.cyndre.huecenter.time.TimeData;
+import com.cyndre.huecenter.view.View;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 

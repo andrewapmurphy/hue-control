@@ -27,13 +27,13 @@ public class Program {
             return new Program(this.shell.parse(script), new HashMap<>(), new HashMap<>());
         }
 
-        /*public Program LoadFile(final Path path) {
+        public String LoadSource(final Path path) {
             try {
-                Files.readString(path);
+                return Files.readString(path);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
-        }*/
+        }
     }
 
     public static class Context {

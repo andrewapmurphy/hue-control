@@ -1,12 +1,15 @@
 package com.cyndre.huecenter.hue;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 public class LightGroup {
     private String name;
     private List<String> lights;
-    private LightState action;;
+    private LightState action;
+    private Map<String, float[]> locations = new HashMap<>();
 
     public String getName() {
         return name;
@@ -30,6 +33,14 @@ public class LightGroup {
 
     public void setAction(LightState action) {
         this.action = action;
+    }
+
+    public Map<String, float[]> getLocations() {
+        return locations;
+    }
+
+    public void setLocations(Map<String, float[]> locations) {
+        this.locations = locations;
     }
 
     @Override

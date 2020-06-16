@@ -1,4 +1,4 @@
-package com.cyndre.huecenter;
+package com.cyndre.huecenter.view;
 
 import javax.swing.*;
 
